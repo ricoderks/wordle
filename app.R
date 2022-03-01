@@ -1,4 +1,4 @@
-# This app was developed by Winston Chang 
+# This app was developed by Winston Chang from Rstudio 
 # https://github.com/wch/shiny-wordle
 
 library(shiny)

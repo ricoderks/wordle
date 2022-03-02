@@ -4,7 +4,7 @@
 library(shiny)
 library(htmltools)
 
-source("wordlist.R")
+# source("wordlist.R")
 
 ui <- fluidPage(
   theme = bslib::bs_theme(version = 4),
@@ -109,14 +109,34 @@ ui <- fluidPage(
       border-radius: 5px;
       box-shadow: 4px 4px 19px rgb(0 0 0 / 17%);
   }
+  .wrapper {
+      overflow: hidden;
+  }
+  .language {
+      text-align: left;
+      float: left;
+  }
 ")),
-div(
-  class = "guesses",
-  h3("Shiny wordle"),
-  uiOutput("previous_guesses"),
-  uiOutput("current_guess"),
-  uiOutput("endgame"),
-  uiOutput("new_game_ui")
+div(class = "wrapper",
+    div(
+      class = "language",
+      # language selector
+      radioButtons(
+        inputId = "rb_select_language",
+        label = "Select language:",
+        choices = c("Nederlands" = "NL",
+                    "English" = "UK"),
+        selected = "UK"
+      )
+    ),
+    div(
+      class = "guesses",
+      h3("Shiny wordle"),
+      uiOutput("previous_guesses"),
+      uiOutput("current_guess"),
+      uiOutput("endgame"),
+      uiOutput("new_game_ui")
+    )
 ),
 uiOutput("keyboard"),
 # div(
@@ -172,6 +192,7 @@ tags$script(HTML("
 
 server <- function(input, output) {
   target_word <- reactiveVal(sample(words_common, 1))
+  all_words <- reactiveVal(words_all)
   all_guesses <- reactiveVal(list())
   finished <- reactiveVal(FALSE)
   current_guess_letters <- reactiveVal(character(0))
@@ -182,11 +203,24 @@ server <- function(input, output) {
     finished(FALSE)
   }
   
+  # change word list
+  observeEvent(input$rb_select_language, {
+    # load the word lists.
+    words_common <- read.table(file = paste0("words_common_", input$rb_select_language, ".txt"))$V1
+    words_all <- read.table(file = paste0("words_all_", input$rb_select_language, ".txt"))$V1
+    
+    # load the wordlist
+    target_word(sample(words_common, 1))
+    all_words(words_all)
+    all_guesses(list())
+    finished <- reactiveVal(FALSE)
+    
+  })
   
   observeEvent(input$Enter, {
     guess <- paste(current_guess_letters(), collapse = "")
     
-    if (! guess %in% words_all)
+    if (! guess %in% all_words())
       return()
     
     # if (input$hard) {

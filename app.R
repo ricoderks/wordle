@@ -111,6 +111,24 @@ ui <- fluidPage(
       border-radius: 5px;
       box-shadow: 4px 4px 19px rgb(0 0 0 / 17%);
   }
+  .endgame-correct {
+      display: inline-block;
+      background-color: #6a5 ;
+      width: 20px;
+      height: 20px;
+  }
+    .endgame-in-word {
+      display: inline-block;
+      background-color: #db5 ;
+      width: 20px;
+      height: 20px;
+    }
+    .endgame-not-in-word {
+      display: inline-block;
+      background-color: #888 ;
+      width: 20px;
+      height: 20px;
+  }
   .wrapper {
       overflow: hidden;
   }
@@ -387,13 +405,17 @@ server <- function(input, output) {
     lines <- lapply(all_guesses(), function(guess) {
       line <- vapply(guess$matches, function(match) {
         switch(match,
-               "correct" = "🟩",
-               "in-word" = "🟨",
-               "not-in-word" = "⬜"
+               "correct" = "endgame-correct",
+               "in-word" = "endgame-in-word",
+               "not-in-word" = "endgame-not-in-word"
         )
       }, character(1))
       
-      div(paste(line, collapse = ""))
+      HTML("<div class=", line[1], "> </div>
+           <div class=", line[2], "> </div>
+           <div class=", line[3], "> </div>
+           <div class=", line[4], "> </div>
+           <div class=", line[5], "> </div><br>")
     })
     
     div(class = "endgame-content", lines)

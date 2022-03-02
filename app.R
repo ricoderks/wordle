@@ -234,7 +234,7 @@ server <- function(input, output, session) {
   
   # Output the time left.
   output$timer <- renderText({
-    paste("Timer: ", seconds_to_period(timer()))
+    paste("Time: ", seconds_to_period(timer()))
   })
   
   # timer stuff

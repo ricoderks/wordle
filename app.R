@@ -194,8 +194,8 @@ tags$script(HTML("
 
 
 server <- function(input, output) {
-  target_word <- reactiveVal(sample(words_common, 1))
-  all_words <- reactiveVal(words_all)
+  target_word <- reactiveVal(character(0))
+  all_words <- reactiveVal(character(0))
   all_guesses <- reactiveVal(list())
   finished <- reactiveVal(FALSE)
   current_guess_letters <- reactiveVal(character(0))

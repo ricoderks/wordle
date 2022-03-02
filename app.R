@@ -19,6 +19,8 @@ ui <- fluidPage(
   .guesses {
       overflow-y: auto;
       height: 100%;
+      position: relative;
+      left: -160px;
   }
   .guesses.finished {
       overflow-y: visible;
@@ -117,26 +119,27 @@ ui <- fluidPage(
       float: left;
   }
 ")),
-div(class = "wrapper",
-    div(
-      class = "language",
-      # language selector
-      radioButtons(
-        inputId = "rb_select_language",
-        label = "Select language:",
-        choices = c("Nederlands" = "NL",
-                    "English" = "UK"),
-        selected = "UK"
-      )
-    ),
-    div(
-      class = "guesses",
-      h3("Shiny wordle"),
-      uiOutput("previous_guesses"),
-      uiOutput("current_guess"),
-      uiOutput("endgame"),
-      uiOutput("new_game_ui")
+div(
+  class = "wrapper",
+  div(
+    class = "language",
+    # language selector
+    radioButtons(
+      inputId = "rb_select_language",
+      label = HTML("<b>Select language:</b>"),
+      choices = c("Nederlands" = "NL",
+                  "English" = "UK"),
+      selected = "UK"
     )
+  ),
+  div(
+    class = "guesses",
+    h3("Shiny wordle"),
+    uiOutput("previous_guesses"),
+    uiOutput("current_guess"),
+    uiOutput("endgame"),
+    uiOutput("new_game_ui")
+  )
 ),
 uiOutput("keyboard"),
 # div(
@@ -214,7 +217,6 @@ server <- function(input, output) {
     all_words(words_all)
     all_guesses(list())
     finished <- reactiveVal(FALSE)
-    
   })
   
   observeEvent(input$Enter, {

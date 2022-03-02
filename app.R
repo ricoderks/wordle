@@ -195,13 +195,14 @@ tags$script(HTML("
 
 server <- function(input, output) {
   target_word <- reactiveVal(character(0))
-  all_words <- reactiveVal(character(0))
+  words_all <- reactiveVal(character(0))
+  words_common <- reactiveVal(character(0))
   all_guesses <- reactiveVal(list())
   finished <- reactiveVal(FALSE)
   current_guess_letters <- reactiveVal(character(0))
   
   reset_game <- function() {
-    target_word(sample(words_common, 1))
+    target_word(sample(words_common(), 1))
     all_guesses(list())
     finished(FALSE)
   }
@@ -209,12 +210,11 @@ server <- function(input, output) {
   # change word list
   observeEvent(input$rb_select_language, {
     # load the word lists.
-    words_common <- read.table(file = paste0("words_common_", input$rb_select_language, ".txt"))$V1
-    words_all <- read.table(file = paste0("words_all_", input$rb_select_language, ".txt"))$V1
+    words_common(read.table(file = paste0("words_common_", input$rb_select_language, ".txt"))$V1)
+    words_all(read.table(file = paste0("words_all_", input$rb_select_language, ".txt"))$V1)
     
     # load the wordlist
-    target_word(sample(words_common, 1))
-    all_words(words_all)
+    target_word(sample(words_common(), 1))
     all_guesses(list())
     finished <- reactiveVal(FALSE)
   })
@@ -222,7 +222,7 @@ server <- function(input, output) {
   observeEvent(input$Enter, {
     guess <- paste(current_guess_letters(), collapse = "")
     
-    if (! guess %in% all_words())
+    if (! guess %in% words_all())
       return()
     
     # if (input$hard) {

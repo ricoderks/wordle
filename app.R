@@ -2,6 +2,7 @@
 # https://github.com/wch/shiny-wordle
 
 library(shiny)
+library(lubridate)
 library(htmltools)
 
 # source("wordlist.R")
@@ -160,6 +161,10 @@ div(
   )
 ),
 uiOutput("keyboard"),
+# show timer here
+textOutput(
+  outputId = "timer"
+),
 # div(
 #   style="display: inline-block;",
 #   checkboxInput("hard", "Hard mode")
@@ -211,19 +216,38 @@ tags$script(HTML("
 )
 
 
-server <- function(input, output) {
+server <- function(input, output, session) {
   target_word <- reactiveVal(character(0))
   words_all <- reactiveVal(character(0))
   words_common <- reactiveVal(character(0))
   all_guesses <- reactiveVal(list())
   finished <- reactiveVal(FALSE)
   current_guess_letters <- reactiveVal(character(0))
+  timer_active <- reactiveVal(TRUE)
+  timer <- reactiveVal(0)
   
   reset_game <- function() {
     target_word(sample(words_common(), 1))
     all_guesses(list())
     finished(FALSE)
   }
+  
+  # Output the time left.
+  output$timer <- renderText({
+    paste("Timer: ", seconds_to_period(timer()))
+  })
+  
+  # timer stuff
+  observe({
+    invalidateLater(millis = 1000,
+                    session = session)
+    
+    isolate({
+      if (timer_active()) {
+        timer(timer() + 1)
+      }
+    })
+  })
   
   # change word list
   observeEvent(input$rb_select_language, {
@@ -235,6 +259,10 @@ server <- function(input, output) {
     target_word(sample(words_common(), 1))
     all_guesses(list())
     finished <- reactiveVal(FALSE)
+    
+    # reset the timer
+    timer(0)
+    timer_active(TRUE)
   })
   
   observeEvent(input$Enter, {
@@ -320,6 +348,9 @@ server <- function(input, output) {
   
   observeEvent(input$new_game, {
     reset_game()
+    # reset the timer
+    timer(0)
+    timer_active(TRUE)
   })
   
   used_letters <- reactive({
@@ -401,6 +432,9 @@ server <- function(input, output) {
   output$endgame <- renderUI({
     if (!finished())
       return()
+    
+    # stop the timer
+    timer_active(FALSE)
     
     lines <- lapply(all_guesses(), function(guess) {
       line <- vapply(guess$matches, function(match) {
